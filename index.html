@@ -15,10 +15,142 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .form-section { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
+        .form-section h3 { color: #334155; font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; border-bottom: 2px solid #cbd5e1; padding-bottom: 0.5rem; }
+    </style>
 </head>
-<body class="bg-gray-100">
-    
-    <!-- COLE AQUI TODO O SEU CÓDIGO DO APLICATIVO (O HEADER, O FORMULÁRIO E O SCRIPT QUE CONSTRUÍMOS ANTERIORMENTE) -->
-    
+<body class="bg-slate-100 p-2 md:p-6 font-sans text-gray-800">
+
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        
+        <!-- CABEÇALHO DO APLICATIVO -->
+        <header class="bg-slate-800 text-white p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">CLÍNICA PAULO VITOR</h1>
+                <p class="text-sm text-slate-300 mt-1">Prontuário Eletrônico e Gestão Clínica</p>
+            </div>
+            <div class="space-x-2 flex">
+                <button onclick="mostrarTela('lista')" class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded font-semibold transition">Pacientes</button>
+                <button onclick="mostrarTela('formulario')" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-semibold transition shadow-lg">+ Novo Cadastro</button>
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 min-h-[500px]">
+            
+            <!-- TELA 1: LISTA DE PACIENTES -->
+            <div id="tela-lista" class="block">
+                <h2 class="text-2xl font-bold text-slate-700 mb-6 border-b-2 border-slate-200 pb-2">Pacientes Registrados</h2>
+                <div id="lista-pacientes" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Os pacientes salvos aparecerão aqui -->
+                </div>
+            </div>
+
+            <!-- TELA 2: FORMULÁRIO DE ANAMNESE -->
+            <div id="tela-formulario" class="hidden">
+                <div class="flex justify-between items-center mb-6 border-b-2 border-slate-200 pb-2">
+                    <h2 class="text-2xl font-bold text-slate-700">Nova Ficha Clínica</h2>
+                </div>
+                
+                <form id="form-paciente" onsubmit="salvarPaciente(event)" class="space-y-6">
+                    
+                    <div class="form-section">
+                        <h3>Dados Pessoais</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Nome Completo</label>
+                                <input type="text" id="nome" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Data de Início da Análise</label>
+                                <input type="date" id="data_inicio" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Telefone / Contato</label>
+                                <input type="text" id="telefone" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Histórico e Escuta Clínca</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Motivo da Busca / Demanda Inicial</label>
+                                <textarea id="demanda" rows="3" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-emerald-500"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Observações da Estrutura / Metapsicologia</label>
+                                <textarea id="observacoes" rows="4" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-emerald-500" placeholder="Anotações sobre mecanismos, transferência, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end pt-4">
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded font-bold text-lg shadow-lg transition">💾 Salvar Prontuário</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT DE FUNCIONAMENTO BÁSICO -->
+    <script>
+        // Função para alternar entre a lista e o formulário
+        function mostrarTela(tela) {
+            document.getElementById('tela-lista').style.display = tela === 'lista' ? 'block' : 'none';
+            document.getElementById('tela-formulario').style.display = tela === 'formulario' ? 'block' : 'none';
+            if(tela === 'lista') carregarPacientes();
+        }
+
+        // Função para salvar no armazenamento local (cache do navegador)
+        function salvarPaciente(event) {
+            event.preventDefault(); // Impede a página de recarregar
+            
+            const paciente = {
+                id: Date.now(),
+                nome: document.getElementById('nome').value,
+                data_inicio: document.getElementById('data_inicio').value,
+                telefone: document.getElementById('telefone').value,
+                demanda: document.getElementById('demanda').value,
+                observacoes: document.getElementById('observacoes').value
+            };
+
+            let pacientes = JSON.parse(localStorage.getItem('pacientes_clinica')) || [];
+            pacientes.push(paciente);
+            localStorage.setItem('pacientes_clinica', JSON.stringify(pacientes));
+
+            document.getElementById('form-paciente').reset();
+            alert('Paciente salvo com sucesso!');
+            mostrarTela('lista');
+        }
+
+        // Função para mostrar os pacientes salvos na tela
+        function carregarPacientes() {
+            const lista = document.getElementById('lista-pacientes');
+            const pacientes = JSON.parse(localStorage.getItem('pacientes_clinica')) || [];
+            
+            lista.innerHTML = '';
+            
+            if(pacientes.length === 0) {
+                lista.innerHTML = '<p class="text-slate-500">Nenhum paciente registrado ainda.</p>';
+                return;
+            }
+
+            pacientes.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-50 p-4 border border-slate-200 rounded shadow-sm';
+                card.innerHTML = `
+                    <h4 class="font-bold text-lg text-slate-800">${p.nome}</h4>
+                    <p class="text-sm text-slate-600">Início: ${p.data_inicio.split('-').reverse().join('/')}</p>
+                `;
+                lista.appendChild(card);
+            });
+        }
+
+        // Inicia carregando a lista
+        carregarPacientes();
+    </script>
 </body>
 </html>
